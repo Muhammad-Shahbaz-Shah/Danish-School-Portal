@@ -1,0 +1,6 @@
+{
+  "name": "Punjab Daanish Schools Portal",
+  "description": "Comprehensive academic portal, student records, teacher directory, result upload engine, and student analytics for Punjab Daanish Schools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

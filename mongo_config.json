@@ -1,0 +1,3 @@
+{
+  "MONGODB_URI": "mongodb://syedshahbazshah7571_db_user:daJKjTM7TLa50r0u@ac-yzqcysd-shard-00-00.wnvpnj9.mongodb.net:27017,ac-yzqcysd-shard-00-01.wnvpnj9.mongodb.net:27017,ac-yzqcysd-shard-00-02.wnvpnj9.mongodb.net:27017/?ssl=true&authSource=admin&appName=Cluster0"
+}
