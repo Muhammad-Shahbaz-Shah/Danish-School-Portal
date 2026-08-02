@@ -20,6 +20,7 @@ import { Student, Teacher, Assessment, Notice, StudentMark, SystemNotification, 
 dotenv.config();
 
 const app = express();
+export default app;
 const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
@@ -2178,9 +2179,11 @@ async function startServer() {
     });
   }
 
+  if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Punjab Daanish Schools Portal server running on http://localhost:${PORT}`);
   });
+}
 }
 
 startServer();
