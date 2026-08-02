@@ -227,20 +227,6 @@ export const StudentRegistrationView: React.FC<StudentRegistrationViewProps> = (
     }
   };
 
-  // Preset functional sample scholars
-  const handleLoadSampleBatch = () => {
-    const sampleBatch: Partial<Student>[] = [
-      { name: 'Muhammad Faizan', guardianName: 'Faizan Ahmed', gender: 'Male', grade: '10th', section: 'Section A', house: 'Jinnah', dob: '2008-02-10', contactPhone: '+92 300 1112233', entryTestMarks: 92, address: 'Mian Channu, Khanewal' },
-      { name: 'Sana Malik', guardianName: 'Malik Hussain', gender: 'Female', grade: '9th', section: 'Section B', house: 'Sir Syed', dob: '2009-06-21', contactPhone: '+92 301 4445566', entryTestMarks: 88, address: 'District Dera Ghazi Khan' },
-      { name: 'Bilal Hassan', guardianName: 'Hassan Raza', gender: 'Male', grade: '12th', section: 'Section C', house: 'Iqbal', dob: '2006-12-05', contactPhone: '+92 302 7778899', entryTestMarks: 85, address: 'District Muzaffargarh' },
-      { name: 'Fatima Zafar', guardianName: 'Zafar Iqbal', gender: 'Female', grade: '11th', section: 'Section A', house: 'Liaquat', dob: '2007-08-19', contactPhone: '+92 303 9990011', entryTestMarks: 95, address: 'Model Town, Bahawalpur' },
-      { name: 'Usman Ghani', guardianName: 'Abdul Ghani', gender: 'Male', grade: '10th', section: 'Section B', house: 'Sir Syed', dob: '2008-11-30', contactPhone: '+92 304 2223344', entryTestMarks: 81, address: 'District Rahim Yar Khan' },
-    ];
-
-    setParsedStudents(sampleBatch);
-    setIsBulkModalOpen(true);
-    addToast('Sample Roster Loaded', 'info', 'Loaded 5 sample Daanish student records.');
-  };
 
   // Confirm final bulk enrollment
   const handleConfirmBulkEnrollment = () => {
@@ -308,7 +294,7 @@ export const StudentRegistrationView: React.FC<StudentRegistrationViewProps> = (
               <span>Form 02-B: Individual Student Dossier</span>
             </div>
             <span className="text-xs font-mono font-semibold text-slate-400">
-              Session 2024-25
+              
             </span>
           </div>
 
@@ -577,15 +563,8 @@ export const StudentRegistrationView: React.FC<StudentRegistrationViewProps> = (
               </div>
             )}
 
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-              <button
-                type="button"
-                onClick={handleLoadSampleBatch}
-                className="text-xs font-bold text-emerald-800 hover:underline flex items-center space-x-1"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Quick Sample (5 Records)</span>
-              </button>
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-center text-xs">
+              
 
               <button
                 type="button"

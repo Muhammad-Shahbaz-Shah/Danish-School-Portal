@@ -55,7 +55,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       return [
         { id: 'student-profile', label: 'My Marks & Dossier', icon: GraduationCap },
         { id: 'student-portal', label: 'Student Search & Directory', icon: Search },
-        { id: 'my-profile', label: 'My Profile', icon: UserCheck },
       ];
     }
   };
