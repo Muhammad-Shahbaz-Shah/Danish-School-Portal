@@ -100,7 +100,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addToast(
         'Connection Error',
         'error',
-        'Failed to reach database server. Please verify your connection.'
+        e
       );
       return false;
     }
