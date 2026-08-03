@@ -13,8 +13,9 @@ import {
   initialAssessments,
   initialNotices,
   initialNotifications,
-} from './src/data/mockData.js';
-import { Student, Teacher, Assessment, Notice, StudentMark, SystemNotification, SchoolStats } from './src/types.js';
+} from './src/data/mockData';
+import { Student, Teacher, Assessment, Notice, StudentMark, SystemNotification, SchoolStats } from './src/types';
+
 
 dotenv.config();
 
@@ -123,35 +124,30 @@ async function connectAndActivateMongo(mongoUri: string) {
   const uri = mongoUri.trim();
   if (!uri) throw new Error('MongoDB URI cannot be empty');
 
-  // Close existing client if active
   if (dbClient) {
     try {
       await dbClient.close();
-    } catch (e) {
-      console.error('Error closing previous MongoDB client:', e);
-    }
+    } catch (e) {}
     dbClient = null;
     mongoDb = null;
   }
 
   const client = new MongoClient(uri, {
-    serverSelectionTimeoutMS: 8000,
-    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 3000,
+    connectTimeoutMS: 3000,
+    socketTimeoutMS: 30000,
     maxIdleTimeMS: 30000,
     retryWrites: true,
   });
   await client.connect();
   const db = client.db('daanish_schools_db');
-  await db.admin().ping();
 
   dbClient = client;
   mongoDb = db;
   process.env.MONGODB_URI = uri;
 
-  // Persist URI to mongo_config.json
   saveMongoConfig(uri);
 
-  // Sync existing MongoDB records into memory state without injecting mock data
   try {
     memoryStudents = (await mongoDb.collection('students').find({}).toArray()) as unknown as Student[];
     memoryTeachers = (await mongoDb.collection('teachers').find({}).toArray()) as unknown as Teacher[];
@@ -177,46 +173,37 @@ async function connectAndActivateMongo(mongoUri: string) {
     console.error('Error syncing existing MongoDB records to memory:', e);
   }
 
-  const counts = {
-    students: await mongoDb.collection('students').countDocuments(),
-    teachers: await mongoDb.collection('teachers').countDocuments(),
-    assessments: await mongoDb.collection('assessments').countDocuments(),
-    notices: await mongoDb.collection('notices').countDocuments(),
-  };
+  let counts = { students: 0, teachers: 0, assessments: 0, notices: 0 };
+  try {
+    counts = {
+      students: await mongoDb.collection('students').countDocuments(),
+      teachers: await mongoDb.collection('teachers').countDocuments(),
+      assessments: await mongoDb.collection('assessments').countDocuments(),
+      notices: await mongoDb.collection('notices').countDocuments(),
+    };
+  } catch (e) {}
 
   return { dbName: db.databaseName, counts };
 }
 
 async function getMongoDb(): Promise<Db | null> {
   if (mongoDb) {
-    try {
-      await mongoDb.admin().ping();
-      return mongoDb;
-    } catch (e: any) {
-      console.warn('[getMongoDb] Active MongoDB connection ping failed. Resetting client and auto-reconnecting...', e?.message || e);
-      mongoDb = null;
-      if (dbClient) {
-        try {
-          await dbClient.close();
-        } catch (err) {}
-        dbClient = null;
-      }
-    }
+    return mongoDb;
   }
 
   const savedUri = process.env.MONGODB_URI || loadMongoConfig();
   if (savedUri && savedUri.trim()) {
     try {
-      console.log('[getMongoDb] Restoring connection using stored MongoDB URI...');
       await connectAndActivateMongo(savedUri);
       return mongoDb;
     } catch (err: any) {
-      console.error('[getMongoDb] Auto-reconnection failed:', err?.message || err);
+      console.error('[getMongoDb] Connection failed:', err?.message || err);
     }
   }
 
   return null;
 }
+
 
 async function initMongoDB() {
   let mongoUri = process.env.MONGODB_URI;
@@ -311,24 +298,25 @@ app.get('/api/db/status', async (_req: Request, res: Response) => {
   let dbName = null;
   let counts = null;
 
-  const db = await getMongoDb();
-  if (db) {
-    try {
+  try {
+    const db = await getMongoDb();
+    if (db) {
       isConnected = true;
       dbName = db.databaseName;
       counts = {
-        students: await db.collection('students').countDocuments(),
-        teachers: await db.collection('teachers').countDocuments(),
-        assessments: await db.collection('assessments').countDocuments(),
+        students: await db.collection('students').countDocuments().catch(() => 0),
+        teachers: await db.collection('teachers').countDocuments().catch(() => 0),
+        assessments: await db.collection('assessments').countDocuments().catch(() => 0),
       };
-    } catch (e: any) {
-      console.error('MongoDB live status check failed:', e?.message || e);
-      isConnected = false;
     }
+  } catch (e: any) {
+    console.error('MongoDB live status check error:', e?.message || e);
+    isConnected = false;
   }
 
   res.json({ isConnected, dbName, counts });
 });
+
 
 // Disconnect MongoDB Endpoint
 app.post('/api/db/disconnect', async (_req: Request, res: Response) => {
