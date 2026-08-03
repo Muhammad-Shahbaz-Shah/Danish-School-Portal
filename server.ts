@@ -2009,9 +2009,12 @@ async function startServer() {
 }
 
 
-export default app;
 
 if (!process.env.VERCEL) {
   startServer();
+} else {
+  initMongoDB();
 }
+
+export default app;
 
