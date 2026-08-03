@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
-import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { MongoClient, Db } from 'mongodb';
@@ -20,10 +19,24 @@ import { Student, Teacher, Assessment, Notice, StudentMark, SystemNotification, 
 dotenv.config();
 
 const app = express();
-export default app;
 const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
+
+// CORS & Vercel serverless route normalization middleware
+app.use((req: Request, res: Response, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  if (req.url && !req.url.startsWith('/api')) {
+    req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
+  }
+  next();
+});
+
 
 // Disk Persistence Configuration Path
 const CONFIG_FILE_PATH = path.join(process.cwd(), 'mongo_config.json');
@@ -221,7 +234,10 @@ async function initMongoDB() {
   }
 }
 
-initMongoDB().catch((err) => console.error(err));
+if (!process.env.VERCEL) {
+  initMongoDB().catch((err) => console.error(err));
+}
+
 
 // Helper lazy Gemini setup
 function getGeminiClient(customApiKey?: string): GoogleGenAI | null {
@@ -1933,61 +1949,6 @@ Keep tone academic, authoritative, and helpful.`;
   }
 });
 
-// AI Official Notice Circular Generator
-app.post('/api/ai/generate-notice', async (req: Request, res: Response) => {
-  const { topic, audience, priority, customApiKey } = req.body;
-
-  const gemini = getGeminiClient(customApiKey);
-  if (!gemini) {
-    return res.json({
-      notice: `# CIRCULAR: ${topic || 'Important Campus Notice'}\n\n` +
-        `**PUNJAB DAANISH SCHOOLS & CENTER OF EXCELLENCE**\n` +
-        `**Date**: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}\n` +
-        `**Target Audience**: ${audience || 'All Students & Staff'}\n` +
-        `**Priority**: ${priority || 'Normal'}\n\n` +
-        `This is an official administrative notice regarding **${topic || 'Upcoming Campus Event'}**.\n\n` +
-        `### Key Instructions:\n` +
-        `1. All concerned students and faculty members are requested to strictly comply with the schedule.\n` +
-        `2. House Masters and Wardens will oversee implementation across residential houses.\n` +
-        `3. For further clarification, contact the Administration Block.\n\n` +
-        `**By Order of:**\n` +
-        `Office of the Principal\n` +
-        `Punjab Daanish Schools & Center of Excellence`,
-      isAiGenerated: false,
-    });
-  }
-
-  try {
-    const prompt = `You are the Administrative AI Officer for Punjab Daanish Schools & Center of Excellence.
-Draft a formal, official campus notice/circular for the Principal's Office on topic: "${topic}".
-Target Audience: ${audience || 'All Students, Teachers, and Staff'}
-Priority Level: ${priority || 'Normal'}
-
-Format as a formal official circular in Markdown:
-Include:
-- Formal Heading (PUNJAB DAANISH SCHOOLS & CENTER OF EXCELLENCE)
-- Ref Number & Date
-- Clear Subject / Title
-- Detailed Body Paragraphs explaining purpose and expectations
-- Key Instructions (numbered list)
-- Official Sign-off (Office of the Principal)
-
-Tone must be formal, administrative, dignified, and authoritative.`;
-
-    const response = await gemini.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: prompt,
-    });
-
-    res.json({
-      notice: response.text,
-      isAiGenerated: true,
-    });
-  } catch (err: any) {
-    console.error('Gemini Notice Generator Error:', err);
-    res.status(500).json({ error: 'Failed to generate notice.' });
-  }
-});
 
 // AI Portal Copilot Assistant
 app.post('/api/ai/copilot', async (req: Request, res: Response) => {
@@ -2031,147 +1992,20 @@ Provide a structured, helpful, precise answer in Markdown format with bullet poi
   }
 });
 
-// AI BISE Practice Quiz Generator
-app.post('/api/ai/quiz-generator', async (req: Request, res: Response) => {
-  const { subject, grade, topic, questionCount, difficulty, customApiKey } = req.body;
 
-  const gemini = getGeminiClient(customApiKey);
-  if (!gemini) {
-    return res.json({
-      quiz: `# BISE PRACTICE QUIZ: ${subject || 'Physics'} (${grade || '10th Grade'})\n` +
-        `**Topic**: ${topic || 'Newtonian Mechanics & Motion'}\n` +
-        `**Difficulty**: ${difficulty || 'Standard Board Level'}\n\n` +
-        `### SECTION A: MULTIPLE CHOICE QUESTIONS (5 Marks)\n` +
-        `1. What is the SI unit of acceleration?\n` +
-        `   - A) m/s\n   - B) m/s²\n   - C) N/kg\n   - D) Joule\n\n` +
-        `2. The rate of change of momentum is equal to:\n` +
-        `   - A) Work\n   - B) Force\n   - C) Power\n   - D) Impulse\n\n` +
-        `### SECTION B: SHORT ANSWER QUESTIONS\n` +
-        `1. State Newton's Second Law of Motion and derive its formula F = ma.\n` +
-        `2. Define Inertia with two real-world examples.\n\n` +
-        `### ANSWER KEY & MARKING SCHEME\n` +
-        `- MCQ 1: **B) m/s²**\n` +
-        `- MCQ 2: **B) Force**\n` +
-        `- Q1 Answer: Rate of momentum change is proportional to applied force. (2 Marks for derivation).`,
-      isAiGenerated: false,
-    });
-  }
 
-  try {
-    const prompt = `You are the BISE Examination & Curriculum Specialist for Punjab Daanish Schools & Center of Excellence.
-Generate a high-quality practice quiz for:
-- Subject: ${subject || 'Physics'}
-- Grade/Class: ${grade || '10th Grade'}
-- Topic: ${topic || 'Core Curriculum'}
-- Questions: ${questionCount || 5} questions
-- Difficulty Level: ${difficulty || 'BISE Board Examination Level'}
 
-Structure in clean Markdown:
-# BISE PRACTICE TEST: ${subject} (${grade})
-## Topic: ${topic}
-
-### SECTION A: MULTIPLE CHOICE QUESTIONS
-(Include 3 MCQs with 4 option choices A-D)
-
-### SECTION B: SHORT / CONCEPTUAL QUESTIONS
-(Include 2 conceptual board questions)
-
-### ANSWER KEY & DETAILED SOLUTION SCHEME
-(Provide step-by-step correct answers and marking breakdown for each question)
-
-Align strictly with Punjab Curriculum & Textbook Board (PCTB) standards.`;
-
-    const response = await gemini.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: prompt,
-    });
-
-    res.json({
-      quiz: response.text,
-      isAiGenerated: true,
-    });
-  } catch (err: any) {
-    console.error('Gemini Quiz Generator Error:', err);
-    res.status(500).json({ error: 'Failed to generate practice quiz.' });
-  }
-});
-
-// AI Pedagogy Lesson Plan Generator
-app.post('/api/ai/lesson-plan', async (req: Request, res: Response) => {
-  const { subject, grade, topic, durationMinutes, customApiKey } = req.body;
-
-  const gemini = getGeminiClient(customApiKey);
-  if (!gemini) {
-    return res.json({
-      lessonPlan: `# PEDAGOGY LESSON PLAN: ${topic || 'Quadratic Equations'} (${subject || 'Mathematics'} - ${grade || '10th Grade'})\n` +
-        `**Duration**: ${durationMinutes || 45} Minutes | **Framework**: PCTB Active Learning Model\n\n` +
-        `### 1. Learning Objectives (SLOs)\n` +
-        `- Students will be able to identify standard form ax² + bx + c = 0.\n` +
-        `- Solve quadratic equations using factorization and quadratic formula.\n\n` +
-        `### 2. Time Breakdown (${durationMinutes || 45} Mins)\n` +
-        `- **00 - 07 Mins (Warm-up)**: Review linear equations and real-life projectile paths.\n` +
-        `- **07 - 25 Mins (Core Instruction)**: Whiteboard derivation of quadratic formula.\n` +
-        `- **25 - 38 Mins (Guided Practice)**: Solve 2 textbook problems in pairs.\n` +
-        `- **38 - 45 Mins (Wrap-up & Exit Slip)**: Quick 1-minute exit question.\n\n` +
-        `### 3. Homework & Board Exam Prep\n` +
-        `- Complete PCTB Exercise 1.1 Questions 3 to 8 in homework registers.`,
-      isAiGenerated: false,
-    });
-  }
-
-  try {
-    const prompt = `You are the Master Pedagogy & Curriculum Specialist for Punjab Daanish Schools & Center of Excellence.
-Create an exemplary 45-minute Pedagogy Lesson Plan for:
-- Subject: ${subject || 'Mathematics'}
-- Grade/Class: ${grade || '10th Grade'}
-- Lesson Topic: ${topic}
-- Class Duration: ${durationMinutes || 45} minutes
-
-Structure as Markdown:
-# PEDAGOGY LESSON PLAN: ${topic}
-## Subject: ${subject} | Grade: ${grade} | Duration: ${durationMinutes || 45} Minutes
-
-### 1. Student Learning Outcomes (SLOs)
-(3 bullet points using Bloom's Taxonomy)
-
-### 2. Required Teaching Tools & Aids
-(Multimedia, Whiteboard diagrams, PCTB Textbook page references)
-
-### 3. Step-by-Step Lesson Execution Timeline
-(Detailed minute-by-minute breakdown: Hook, Concept Delivery, Group Activity, Assessment)
-
-### 4. Differentiated Remedial & Support Strategy
-(Adaptations for struggling students vs high achievers)
-
-### 5. Board Exam Practice Homework
-(Targeted PCTB textbook exercises)
-
-Tone should be professional, structured, and pedagogical.`;
-
-    const response = await gemini.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: prompt,
-    });
-
-    res.json({
-      lessonPlan: response.text,
-      isAiGenerated: true,
-    });
-  } catch (err: any) {
-    console.error('Gemini Lesson Plan Error:', err);
-    res.status(500).json({ error: 'Failed to generate lesson plan.' });
-  }
-});
 
 // ================= VITE & PRODUCTION MIDDLEWARE =================
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
@@ -2179,10 +2013,13 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Punjab Daanish Schools Portal server running on http://localhost:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Punjab Daanish Schools Portal server running on http://localhost:${PORT}`);
+    });
+  }
 }
+
 
 export default app;
 
