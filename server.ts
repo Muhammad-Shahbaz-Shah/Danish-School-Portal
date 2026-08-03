@@ -2179,11 +2179,14 @@ async function startServer() {
     });
   }
 
-  if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Punjab Daanish Schools Portal server running on http://localhost:${PORT}`);
   });
 }
+
+export default app;
+
+if (!process.env.VERCEL) {
+  startServer();
 }
 
-startServer();
