@@ -18,6 +18,7 @@ import {
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 import { AiSettings, SchoolStats, Teacher, UserSession } from '../types';
+import { div } from 'motion/react-client';
 
 interface SettingsViewProps {
   currentUser: UserSession;
@@ -389,8 +390,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       } catch (e) { }
     }
 
-    localStorage.setItem('daanish_2fa', String(twoFactor));
-    localStorage.setItem('daanish_email_notif', String(emailNotif));
 
     setIsSaved(true);
     addToast('Configurations Saved!', 'success', 'Saved campus profile, AI features, active database URI, and security settings.');
@@ -508,7 +507,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
               {/* Active Grades Badges */}
               <div className="flex flex-wrap gap-2">
-                {gradesList.map((g) => (
+                {gradesList.length>0 ? gradesList.map((g) => (
                   <span
                     key={g}
                     className="inline-flex items-center space-x-1.5 px-3 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded-xl text-xs font-bold"
@@ -518,12 +517,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       type="button"
                       onClick={() => handleRemoveGrade(g)}
                       title="Remove grade level"
-                      className="text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                      className="text-teal-800 hover:text-rose-600 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </span>
-                ))}
+                )) : Array.from({ length: 8 }, (_, index) =>  <div className='bg-slate-100 animate-pulse rounded-xl w-20 h-7'></div>
+              )}
               </div>
 
               {/* Add New Grade Form */}
@@ -561,7 +561,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
               {/* Active Sections Badges */}
               <div className="flex flex-wrap gap-2">
-                {sectionsList.map((sec) => (
+                {sectionsList.length>0 ?sectionsList.map((sec) => (
                   <span
                     key={sec}
                     className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-slate-800 rounded-xl text-xs font-bold"
@@ -576,7 +576,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </span>
-                ))}
+                )): Array.from({ length: 8 }, (_, index) =>  <div className='bg-slate-100 animate-pulse rounded-xl w-20 h-7'></div>)}
               </div>
 
               {/* Add New Section Form */}
@@ -614,7 +614,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
               {/* Active Departments Badges */}
               <div className="flex flex-wrap gap-2">
-                {departmentsList.map((dept) => (
+                {departmentsList.length>0 ? departmentsList.map((dept) => (
                   <span
                     key={dept}
                     className="inline-flex items-center space-x-1.5 px-3 py-1 bg-sky-50 border border-sky-200 text-sky-900 rounded-xl text-xs font-bold"
@@ -629,7 +629,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </span>
-                ))}
+                )):  Array.from({ length: 8 }, (_, index) =>  <div className='bg-slate-100 animate-pulse rounded-xl w-20 h-7'></div>)}
               </div>
 
               {/* Add New Department Form */}
@@ -654,7 +654,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             {/* Academic Houses Card */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center space-x-2.5 pb-3 border-b border-slate-100">
-                <div className="p-2 bg-amber-100 text-amber-800 rounded-xl">
+                <div className="p-2 bg-mist-300 text-mist-800 rounded-xl">
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
@@ -667,22 +667,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
               {/* Active Houses Badges */}
               <div className="flex flex-wrap gap-2">
-                {housesList.map((house) => (
+                {housesList .length > 0 ?housesList.map((house) => (
                   <span
                     key={house}
-                    className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-950 rounded-xl text-xs font-bold"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1 bg-mist-50 border border-mist-200 text-mist-950 rounded-xl text-xs font-bold"
                   >
                     <span>{house} House</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveHouse(house)}
                       title="Remove house"
-                      className="text-amber-500 hover:text-rose-600 transition-colors cursor-pointer"
+                      className="text-mist-500 hover:text-rose-600 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </span>
-                ))}
+                )): Array.from({ length: 8 }, (_, index) =>  <div className='bg-slate-100 animate-pulse rounded-xl w-20 h-7'></div>)}
               </div>
 
               {/* Add New House Form */}
@@ -692,11 +692,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   placeholder="e.g. Jinnah, Liaquat, Iqbal"
                   value={newHouseInput}
                   onChange={(e) => setNewHouseInput(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-700"
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-mist-700"
                 />
                 <button
                   type="submit"
-                  className="px-3.5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center space-x-1 cursor-pointer"
+                  className="px-3.5 py-2 bg-mist-700 hover:bg-mist-800 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center space-x-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add House</span>

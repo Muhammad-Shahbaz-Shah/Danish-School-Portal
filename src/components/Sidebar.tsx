@@ -80,20 +80,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed md:sticky top-0 left-0 z-50 md:z-20 w-72 max-w-[85vw] md:w-64 bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 h-screen shrink-0 select-none transition-transform duration-300 ease-in-out font-['Plus_Jakarta_Sans',sans-serif] ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
+        className={`fixed md:sticky bg-white text-slate-800 border-slate-200/90 shadow-xs top-0 left-0 z-50 md:z-20 w-72 max-w-[85vw] md:w-64   flex flex-col  h-screen shrink-0 select-none transition-transform duration-300 ease-in-out font-['Plus_Jakarta_Sans',sans-serif] ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
           }`}
       >
         {/* Brand Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-amber-300 font-bold shadow-md ring-1 ring-emerald-500/30">
+            <div className="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-white font-bold shadow-xs ring-1 ring-emerald-700/20">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div className="overflow-hidden">
-              <div className="text-[10px] uppercase tracking-wider text-emerald-400 font-extrabold">
+              <div className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">
                 PUNJAB DAANISH
               </div>
-              <div className="text-sm font-bold text-white truncate font-['Playfair_Display']">
+              <div className="text-sm font-bold text-slate-900 truncate font-['Playfair_Display']">
                 Schools Portal
               </div>
             </div>
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl md:hidden transition-colors"
+              className="p-2  rounded-xl md:hidden transition-colors"
               aria-label="Close menu"
             >
               <X className="w-5 h-5 text-rose-400" />
@@ -111,12 +111,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Campus Selector Badge */}
-        <div className="mx-3 mt-3 p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2 text-slate-300 truncate">
-            <Building2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="font-medium truncate">Fazilpur Campus</span>
+        <div className="mx-3 mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-2 text-slate-700 truncate">
+            <Building2 className="w-4 h-4 text-emerald-700  shrink-0" />
+            <span className="font-semibold truncate">Fazilpur Campus</span>
           </div>
-          <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">
+          <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">
             ACTIVE
           </span>
         </div>
@@ -126,17 +126,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="p-3">
             <button
               onClick={() => handleNavClick('student-registration')}
-              className="w-full flex items-center justify-center space-x-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-3 rounded-xl shadow-sm transition-all text-xs"
+              className="w-full flex items-center justify-center space-x-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-2.5 px-3 rounded-xl  transition-all text-xs cursor-pointer"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>New Students</span>
+              <PlusCircle className="w-4 h-4 text-emerald-200" />
+              <span>New Student Enrollment</span>
             </button>
           </div>
         )}
 
         {/* Nav Menu */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          <div className="text-[10px] font-bold text-slate-500 uppercase px-3 pb-1 tracking-wider">
+        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto scrollbar-none">
+          <div className="text-[10px] font-bold  text-slate-400 uppercase px-3 pb-1 tracking-wider">
             Main Navigation
           </div>
           {navItems.map((item) => {
@@ -147,33 +147,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${isActive
-                  ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/60 shadow-xs'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  ? 'bg-emerald-900 text-white  border  border-emerald-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-emerald-900 hover:bg-slate-100/80'
                   }`}
               >
                 <div className="flex items-center space-x-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-200' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />}
+                {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-200" />}
               </button>
             );
           })}
         </nav>
 
         {/* User Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/50">
-          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-800/40 border border-slate-700/40 hover:border-emerald-500/50 transition-colors">
+        <div className="p-3 border-t border-slate-100 bg-slate-50/60">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:border-emerald-700 transition-colors">
             <button
               onClick={() => handleNavClick('my-profile')}
               className="flex items-center space-x-2.5 overflow-hidden text-left hover:opacity-90 cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-emerald-800 text-white flex items-center justify-center text-xs font-bold border border-emerald-600 shrink-0">
+              <div className="w-8 h-8 rounded-full bg-emerald-800 text-white flex items-center justify-center text-xs font-bold border border-emerald-700 shrink-0">
                 {currentUser.userName.charAt(0)}
               </div>
               <div className="overflow-hidden">
-                <div className="text-xs font-semibold text-white truncate">{currentUser.userName}</div>
-                <div className="text-[10px] text-emerald-400 font-bold capitalize truncate">My Profile</div>
+                <div className="text-xs font-bold  text-slate-900 truncate">{currentUser.userName}</div>
+                <div className="text-[10px] text-emerald-700 font-bold capitalize truncate">View Profile</div>
               </div>
             </button>
             <button
@@ -182,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onCloseMobile?.();
               }}
               title="Logout"
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

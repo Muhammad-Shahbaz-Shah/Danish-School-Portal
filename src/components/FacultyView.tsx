@@ -18,6 +18,9 @@ import {
   FileSpreadsheet,
   Download,
   Sparkles,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Teacher } from '../types';
 
@@ -51,6 +54,28 @@ export const FacultyView: React.FC<FacultyViewProps> = ({
   const [rawCsvInput, setRawCsvInput] = useState('');
   const [parsedTeachers, setParsedTeachers] = useState<Partial<Teacher>[]>([]);
   const [isBulkPreviewOpen, setIsBulkPreviewOpen] = useState(false);
+
+  // Pagination & Action Dropdown States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, deptFilter]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (activeDropdownId !== null) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.action-dropdown-container')) {
+          setActiveDropdownId(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdownId]);
 
   // New Teacher Modal Form State
   const defaultDepts = ['Sciences', 'Mathematics', 'Computer Science', 'English', 'Urdu', 'Humanities', 'Islamiat', 'Social Sciences', 'Sports & Physical Ed'];
@@ -141,7 +166,11 @@ export const FacultyView: React.FC<FacultyViewProps> = ({
     setPassword('teacher123');
     addToast('Faculty Member Onboarded', 'success', `Registered ${name} (${teacherEmail}) with login password: ${password.trim() || 'teacher123'}`);
   };
-
+const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage) || 1;
+  const paginatedTeachers = filteredTeachers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   // Helper to parse CSV string into Partial<Teacher>[]
   const parseTeacherCsvText = (text: string): Partial<Teacher>[] => {
     const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
@@ -422,7 +451,7 @@ Mr. Bilal Hassan, Assistant Professor, Humanities, M.A. History, 8, bilal.hassan
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className="bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md font-semibold text-[11px]">
+                    <span className=" text-emerald-800  font-semibold text-[11px]">
                       {teacher.qualification}
                     </span>
                   </td>
@@ -452,7 +481,80 @@ Mr. Bilal Hassan, Assistant Professor, Humanities, M.A. History, 8, bilal.hassan
                   </td>
                  
                   <td className="p-4 text-right">
-                    <div className="grid-cols-2 gap-2 hidden md:grid space-x-1.5">
+                    <td className="p-4 text-right">
+                      <div className="relative inline-block text-left action-dropdown-container">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdownId(activeDropdownId === teacher.id ? null : teacher.id);
+                          }}
+                          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border border-slate-200/80 bg-white shadow-2xs"
+                          title="Actions Menu"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+
+                        {activeDropdownId === teacher.id && (
+                          <div className="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1.5 animate-in fade-in zoom-in-95 text-left font-['Plus_Jakarta_Sans']">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveDropdownId(null);
+                                onSelectTeacher(teacher);
+                              }}
+                              className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-800 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-4 h-4 text-emerald-700" />
+                              <span>View Profile</span>
+                            </button>
+
+                            {onOpenAssignClassModal && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveDropdownId(null);
+                                  onOpenAssignClassModal(teacher);
+                                }}
+                                className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-800 transition-colors cursor-pointer"
+                              >
+                                <BookOpen className="w-4 h-4 text-indigo-700" />
+                                <span>Assign Subjects</span>
+                              </button>
+                            )}
+
+                            {onOpenAssignInChargeModal && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveDropdownId(null);
+                                  onOpenAssignInChargeModal(teacher);
+                                }}
+                                className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition-colors cursor-pointer"
+                              >
+                                <GraduationCap className="w-4 h-4 text-amber-600" />
+                                <span>Appoint In-Charge</span>
+                              </button>
+                            )}
+
+                            <div className="my-1 border-t border-slate-100"></div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveDropdownId(null);
+                                onDeleteTeacher(teacher.id);
+                              }}
+                              className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4 text-rose-600" />
+                              <span>Delete Teacher</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    {/* <div className="grid-cols-2 gap-2 hidden md:grid space-x-1.5">
                       {onOpenAssignClassModal && (
                         <button
                           onClick={() => onOpenAssignClassModal(teacher)}
@@ -485,12 +587,78 @@ Mr. Bilal Hassan, Assistant Professor, Humanities, M.A. History, 8, bilal.hassan
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    </div>
+                    </div> */}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="p-4 border-t border-slate-200/80 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+          <div className="font-medium">
+            Showing{' '}
+            <strong className="text-slate-900 font-bold">
+              {filteredTeachers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+            </strong>{' '}
+            to{' '}
+            <strong className="text-slate-900 font-bold">
+              {Math.min(currentPage * itemsPerPage, filteredTeachers.length)}
+            </strong>{' '}
+            of <strong className="text-slate-900 font-bold">{filteredTeachers.length}</strong> faculty members
+          </div>
+
+          <div className="flex items-center space-x-1">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white text-slate-700 font-bold transition-all shadow-2xs cursor-pointer disabled:cursor-not-allowed"
+              title="Previous Page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center space-x-1 px-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                if (
+                  totalPages > 7 &&
+                  pageNum !== 1 &&
+                  pageNum !== totalPages &&
+                  Math.abs(pageNum - currentPage) > 1
+                ) {
+                  if (pageNum === 2 && currentPage > 3) return <span key={pageNum} className="px-1 text-slate-400">...</span>;
+                  if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key={pageNum} className="px-1 text-slate-400">...</span>;
+                  return null;
+                }
+
+                const isActive = pageNum === currentPage;
+                return (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-800 text-white shadow-2xs'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white text-slate-700 font-bold transition-all shadow-2xs cursor-pointer disabled:cursor-not-allowed"
+              title="Next Page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

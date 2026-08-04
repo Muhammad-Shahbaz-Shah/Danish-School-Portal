@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from "react";
 import {
   GraduationCap,
   Users,
@@ -10,8 +10,10 @@ import {
   Plus,
   UserPlus,
   PencilLine,
-} from 'lucide-react';
-import { Teacher, Student, Assessment } from '../types';
+  Building2,
+  Pencil,
+} from "lucide-react";
+import { Teacher, Student, Assessment } from "../types";
 
 interface TeacherAssignmentMatrixViewProps {
   teachers: Teacher[];
@@ -24,27 +26,25 @@ interface TeacherAssignmentMatrixViewProps {
   onSelectTeacher?: (teacher: Teacher) => void;
 }
 
-const FALLBACK_GRADES = ['6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+const FALLBACK_GRADES = ["6th", "7th", "8th", "9th", "10th", "11th", "12th"];
 
 const normalizeGrade = (g: string): string => {
-  if (!g) return '';
-  return g
-    .toLowerCase()
-    .replace(/grade/g, '')
-    .replace(/class/g, '')
-    .trim();
+  if (!g) return "";
+  return g.toLowerCase().replace(/grade/g, "").replace(/class/g, "").trim();
 };
 
 const normalizeSection = (s: string): string => {
-  if (!s) return '';
+  if (!s) return "";
   return s
     .toLowerCase()
-    .replace(/section\s*/g, '')
-    .replace(/sec\s*/g, '')
+    .replace(/section\s*/g, "")
+    .replace(/sec\s*/g, "")
     .trim();
 };
 
-export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewProps> = ({
+export const TeacherAssignmentMatrixView: React.FC<
+  TeacherAssignmentMatrixViewProps
+> = ({
   teachers,
   students,
   assessments = [],
@@ -54,15 +54,15 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
   onOpenAssignInChargeModal,
   onSelectTeacher,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [gradeFilter, setGradeFilter] = useState<string>('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [gradeFilter, setGradeFilter] = useState<string>("All");
 
   // DB Settings State (Grades and Sections defined by Principal in Settings)
   const [dbGrades, setDbGrades] = useState<string[]>(propGrades || []);
   const [dbSections, setDbSections] = useState<string[]>(propSections || []);
 
   useEffect(() => {
-    fetch('/api/settings')
+    fetch("/api/settings")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -78,7 +78,9 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
   }, []);
 
   // Active section tab selected per grade
-  const [activeSectionPerGrade, setActiveSectionPerGrade] = useState<{ [grade: string]: string }>({});
+  const [activeSectionPerGrade, setActiveSectionPerGrade] = useState<{
+    [grade: string]: string;
+  }>({});
 
   const handleSectionTabChange = (grade: string, section: string) => {
     setActiveSectionPerGrade((prev) => ({ ...prev, [grade]: section }));
@@ -107,9 +109,11 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
     students.forEach((s) => addGrade(s.grade));
     teachers.forEach((t) => {
       if (t.classInChargeOf) {
-        const parts = t.classInChargeOf.split(',');
+        const parts = t.classInChargeOf.split(",");
         parts.forEach((part) => {
-          const match = part.match(/(?:Grade|Class)?\s*([0-9]+(?:st|nd|rd|th)?|[A-Za-z0-9\s]+?)(?:\s*-|\s*\(|\s*$)/i);
+          const match = part.match(
+            /(?:Grade|Class)?\s*([0-9]+(?:st|nd|rd|th)?|[A-Za-z0-9\s]+?)(?:\s*-|\s*\(|\s*$)/i,
+          );
           if (match && match[1]) {
             addGrade(match[1]);
           } else {
@@ -149,12 +153,12 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
 
       // Filter real students for this grade
       const gradeStudents = students.filter(
-        (s) => normalizeGrade(s.grade) === normGrade
+        (s) => normalizeGrade(s.grade) === normGrade,
       );
 
       // Filter real assessments for this grade
       const gradeAssessments = assessments.filter(
-        (a) => normalizeGrade(a.grade) === normGrade
+        (a) => normalizeGrade(a.grade) === normGrade,
       );
 
       // Dynamically extract sections for this grade (starting with Principal DB settings selection)
@@ -167,7 +171,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
         const norm = normalizeSection(trimmed);
         if (norm && !secMap.has(norm)) {
           let display = trimmed;
-          if (!display.toLowerCase().startsWith('section')) {
+          if (!display.toLowerCase().startsWith("section")) {
             display = `Section ${display}`;
           }
           secMap.set(norm, display);
@@ -185,7 +189,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
       });
       teachers.forEach((t) => {
         if (t.classInChargeOf) {
-          const parts = t.classInChargeOf.split(',');
+          const parts = t.classInChargeOf.split(",");
           parts.forEach((part) => {
             if (normalizeGrade(part) === normGrade) {
               const match = part.match(/Section\s*([A-Z0-9]+)/i);
@@ -208,9 +212,9 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
       });
 
       if (secMap.size === 0) {
-        addSec('Section A');
-        addSec('Section B');
-        addSec('Section C');
+        addSec("Section A");
+        addSec("Section B");
+        addSec("Section C");
       }
 
       const availableSections = Array.from(secMap.values()).sort();
@@ -221,7 +225,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
 
         // Real Student Count
         const secStudents = gradeStudents.filter(
-          (s) => normalizeSection(s.section || 'Section A') === normSec
+          (s) => normalizeSection(s.section || "Section A") === normSec,
         );
         const studentCount = secStudents.length;
 
@@ -240,7 +244,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
 
         // Real Section Class Average (Percentage)
         const secAssessments = gradeAssessments.filter(
-          (a) => normalizeSection(a.section || 'Section A') === normSec
+          (a) => normalizeSection(a.section || "Section A") === normSec,
         );
 
         let secAvgPct: number | null = null;
@@ -254,13 +258,16 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
                 totalObtained += m.marksObtained;
                 totalMax += asm.maxMarks;
               });
-            } else if (asm.classAverage !== undefined && asm.classAverage !== null) {
+            } else if (
+              asm.classAverage !== undefined &&
+              asm.classAverage !== null
+            ) {
               totalObtained += asm.classAverage;
               totalMax += 100;
             }
           });
           if (totalMax > 0) {
-            secAvgPct = Math.round((totalObtained / totalMax) * 100) ;
+            secAvgPct = Math.round((totalObtained / totalMax) * 100);
           }
         }
 
@@ -277,7 +284,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             t.classesTaught.forEach((c) => {
               if (
                 normalizeGrade(c.grade) === normGrade &&
-                normalizeSection(c.section || 'Section A') === normSec
+                normalizeSection(c.section || "Section A") === normSec
               ) {
                 appointedTeachers.push({
                   subject: c.subject,
@@ -300,19 +307,24 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
       });
 
       // Grade aggregates
-      const totalStudents = sections.reduce((acc, s) => acc + s.studentCount, 0);
+      const totalStudents = sections.reduce(
+        (acc, s) => acc + s.studentCount,
+        0,
+      );
       const validPcts = sections
         .map((s) => s.secAvgPct)
         .filter((p): p is number => p !== null);
 
       const gradeAvgPct =
         validPcts.length > 0
-          ? Math.round((validPcts.reduce((a, b) => a + b, 0) / validPcts.length) * 10) / 10
+          ? Math.round(
+              (validPcts.reduce((a, b) => a + b, 0) / validPcts.length) * 10,
+            ) / 10
           : null;
 
       const totalGradeAllocations = sections.reduce(
         (acc, s) => acc + s.appointedTeachers.length,
-        0
+        0,
       );
 
       const uniqueTeachersInGrade = new Set<string>();
@@ -338,7 +350,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
   const filteredGradeMatrix = useMemo(() => {
     return gradeMatrixData.filter((gm) => {
       const matchesGradeFilter =
-        gradeFilter === 'All' ||
+        gradeFilter === "All" ||
         normalizeGrade(gm.grade) === normalizeGrade(gradeFilter);
 
       const term = searchTerm.toLowerCase();
@@ -354,8 +366,8 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
               (ap) =>
                 ap.subject.toLowerCase().includes(term) ||
                 ap.teacher.name.toLowerCase().includes(term) ||
-                ap.teacher.department.toLowerCase().includes(term)
-            )
+                ap.teacher.department.toLowerCase().includes(term),
+            ),
         );
 
       return matchesGradeFilter && matchesTerm;
@@ -363,10 +375,13 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
   }, [gradeMatrixData, gradeFilter, searchTerm]);
 
   // Overall Statistics
-  const totalStudentsAll = gradeMatrixData.reduce((acc, g) => acc + g.totalStudents, 0);
+  const totalStudentsAll = gradeMatrixData.reduce(
+    (acc, g) => acc + g.totalStudents,
+    0,
+  );
   const totalAllocatedTeachers = gradeMatrixData.reduce(
     (acc, g) => acc + g.totalGradeAllocations,
-    0
+    0,
   );
 
   return (
@@ -382,11 +397,10 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             Teacher Assignment Matrix
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Class In-Charge appointments & active subject teacher assignments fetched directly from records.
+            Class In-Charge appointments & active subject teacher assignments
+            fetched directly from records.
           </p>
         </div>
-
-        
       </div>
 
       {/* Overview Statistics Bar */}
@@ -399,7 +413,9 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             <div className="text-xl font-bold text-slate-900 font-['Playfair_Display']">
               {totalStudentsAll}
             </div>
-            <div className="text-[11px] font-semibold text-slate-500">Enrolled Students</div>
+            <div className="text-[11px] font-semibold text-slate-500">
+              Enrolled Students
+            </div>
           </div>
         </div>
 
@@ -411,7 +427,9 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             <div className="text-xl font-bold text-slate-900 font-['Playfair_Display']">
               {teachers.length} Active Faculty
             </div>
-            <div className="text-[11px] font-semibold text-slate-500">Teaching Staff</div>
+            <div className="text-[11px] font-semibold text-slate-500">
+              Teaching Staff
+            </div>
           </div>
         </div>
 
@@ -423,7 +441,9 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             <div className="text-xl font-bold text-slate-900 font-['Playfair_Display']">
               {totalAllocatedTeachers}
             </div>
-            <div className="text-[11px] font-semibold text-slate-500">Active Subject Assignments</div>
+            <div className="text-[11px] font-semibold text-slate-500">
+              Active Subject Assignments
+            </div>
           </div>
         </div>
       </div>
@@ -448,15 +468,15 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
             <Filter className="w-3 h-3" />
             <span>Grade:</span>
           </span>
-          {['All', ...dynamicGrades].map((g) => (
+          {["All", ...dynamicGrades].map((g) => (
             <button
               key={g}
               type="button"
               onClick={() => setGradeFilter(g)}
               className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
                 gradeFilter === g
-                  ? 'bg-emerald-800 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? "bg-emerald-800 text-white shadow-2xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
               {g}
@@ -466,7 +486,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
       </div>
 
       {/* Full-Width Grade Cards Stack */}
-      <div className="space-y-6">
+       <div className="space-y-8">
         {filteredGradeMatrix.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-2">
             <School className="w-10 h-10 mx-auto text-slate-300" />
@@ -482,32 +502,41 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
               gm.sections.find((s) => s.section === activeSectionName) || gm.sections[0];
 
             return (
-              <div
-                key={gm.grade}
-                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden"
-              >
-                {/* Full-Width Grade Header Banner */}
-                <div className="  bg-white p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  {/* Left Title */}
-                  <div className="flex items-center space-x-3.5">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-800 border border-emerald-600/40 flex flex-col items-center justify-center font-bold text-white shadow-xs">
-                      <span className="text-[10px] uppercase tracking-wider text-emerald-200">Grade</span>
-                      <span className="text-lg font-bold leading-none">{gm.grade}</span>
+              <div key={gm.grade} className="space-y-4">
+                {/* 1. Header Section Card */}
+                <header className="bg-white rounded-2xl shadow-2xs border border-slate-200/90 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-center gap-5">
+                    {/* Grade Badge Icon */}
+                    <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-800 shrink-0 border border-emerald-100/90 shadow-2xs">
+                      <GraduationCap className="w-8 h-8 text-emerald-800" />
                     </div>
+
+                    {/* Header Info */}
                     <div>
-                      <h2 className="text-lg font-bold  font-['Playfair_Display']">
-                        Grade {gm.grade}
-                      </h2>
-                      <div className="flex items-center space-x-3 text-xs  mt-0.5">
-                        <span>Total Students: <strong className="">{gm.totalStudents}</strong></span>
-                        <span>•</span>
-                        <span>Assigned Teachers: <strong className="text-sky-600">{gm.uniqueAssignedTeachersCount}</strong></span>
+                      <div className="flex items-center gap-3 mb-1">
+                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight font-['Playfair_Display']">
+                          Grade {gm.grade.toLowerCase().includes('th') || gm.grade.toLowerCase().includes('st') || gm.grade.toLowerCase().includes('nd') || gm.grade.toLowerCase().includes('rd') ? gm.grade : `${gm.grade}th`}
+                        </h1>
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200">
+                          Active
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Users className="w-4 h-4 text-slate-400" />
+                          <span>Students: <strong className="text-slate-800 font-bold">{gm.totalStudents}</strong></span>
+                        </div>
+                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <div className="flex items-center gap-1.5">
+                          <UserCheck className="w-4 h-4 text-slate-400" />
+                          <span>Teachers: <strong className="text-slate-800 font-bold">{gm.totalGradeAllocations > 0 ? gm.totalGradeAllocations : teachers.length}</strong></span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Section Tabs */}
-                  <div className="flex items-center  p-1.5 rounded-xl border  bg-slate-50 gap-1 w-full md:w-auto overflow-x-auto">
+                  {/* Section Switcher */}
+                  <div className="bg-slate-50 p-1 rounded-xl border border-slate-200/90 inline-flex shadow-2xs">
                     {gm.sections.map((sec) => {
                       const isActive = sec.section === activeSectionName;
                       return (
@@ -515,215 +544,259 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
                           key={sec.section}
                           type="button"
                           onClick={() => handleSectionTabChange(gm.grade, sec.section)}
-                          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center space-x-2 ${
+                          className={`px-5 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                             isActive
                               ? 'bg-emerald-800 text-white shadow-2xs'
-                              : ' '
+                              : 'text-slate-600 hover:text-slate-900 font-semibold hover:bg-slate-100'
                           }`}
                         >
-                          <span>{sec.section}</span>
-                         
+                          {sec.section}
                         </button>
                       );
                     })}
                   </div>
-                </div>
+                </header>
 
-                {/* Section View Content */}
-                {activeSecObj && (
-                  <div className="p-6 space-y-6">
-                    {/* Top Section Summary & Class In-Charge */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Section Stats Card */}
-                      <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
-                        <div>
-                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            Active Section
-                          </div>
-                          <div className="text-base font-bold text-slate-900 mt-0.5 font-['Playfair_Display']">
-                            Grade {gm.grade} — {activeSecObj.section}
-                          </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            Enrolled: <strong className="text-amber-600">{activeSecObj.studentCount}</strong> Students
-                          </div>
-                        </div>
-
-                        {/* Clean Percentage Display */}
-                        <div className="text-right border-l border-slate-200 pl-4">
-                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            Class Average
-                          </div>
-                          <div className="text-2xl font-bold text-slate-900 font-['Playfair_Display'] mt-0.5">
-                            {activeSecObj.secAvgPct !== null ? `${activeSecObj.secAvgPct}%` : '—'}
-                          </div>
-                          <div className="text-[11px] text-slate-500">
-                            {activeSecObj.secAvgPct !== null ? 'Exam Performance' : 'No test records'}
-                          </div>
-                        </div>
+                {/* 2. Grid Cards (Active Section & Class In-Charge) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* BEGIN: Active Section Details Card */}
+                  <section className="bg-white rounded-2xl shadow-2xs border border-slate-200/90 p-6 flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div>
+                        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                          Active Section
+                        </h2>
+                        <h3 className="text-xl font-bold text-slate-900 tracking-tight font-['Playfair_Display']">
+                          Grade {gm.grade.toLowerCase().includes('th') || gm.grade.toLowerCase().includes('st') || gm.grade.toLowerCase().includes('nd') || gm.grade.toLowerCase().includes('rd') ? gm.grade : `${gm.grade}th`} — {activeSecObj.section.replace(/section\s*/i, '')}
+                        </h3>
                       </div>
-
-                      {/* Class In-Charge Card */}
-                      <div className="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                              CLASS IN-CHARGE TEACHER
-                            </span>
-                          </div>
-
-                          {activeSecObj.inCharge ? (
-                            <div
-                              onClick={() =>
-                                onSelectTeacher &&
-                                activeSecObj.inCharge &&
-                                onSelectTeacher(activeSecObj.inCharge)
-                              }
-                              className="flex items-center space-x-3 cursor-pointer pt-1"
-                            >
-                              <img
-                                src={activeSecObj.inCharge.photoUrl}
-                                alt={activeSecObj.inCharge.name}
-                                className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-300"
-                              />
-                              <div>
-                                <div className="font-bold text-slate-900 text-xs hover:text-emerald-800">
-                                  {activeSecObj.inCharge.name}
-                                </div>
-                                <div className="text-[11px] text-emerald-800 font-semibold">
-                                  {activeSecObj.inCharge.designation}
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-xs text-slate-400 italic pt-1">
-                              No In-Charge appointed for {activeSecObj.section}
-                            </div>
-                          )}
-                        </div>
-
-                        {onOpenAssignInChargeModal && (
-                          <button
-                            type="button"
-                            onClick={() => onOpenAssignInChargeModal(activeSecObj.inCharge)}
-                            className="text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
-                          >
-                            {activeSecObj.inCharge ? 'Change' : '+ Appoint'}
-                          </button>
-                        )}
+                      <div className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-50 border border-slate-200/80 text-xs text-slate-600 gap-2 font-medium">
+                        <Users className="w-4 h-4 text-emerald-800" />
+                        <span>Enrolled: <strong className="text-slate-900 font-bold">{activeSecObj.studentCount}</strong> Students</span>
                       </div>
                     </div>
 
-                    {/* Appointed Teachers List ONLY */}
-                    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                      <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                          Appointed Subject Teachers 
-                        </h3>
-                        <div className="flex items-center space-x-3">
-                          <span className="text-xs font-semibold text-slate-500">
-                            {activeSecObj.appointedTeachers.length} Appointed
+                    {/* Right Class Average Ring */}
+                    <div className="flex items-center gap-4 border-l border-slate-100 pl-6">
+                      <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
+                        {/* Circular Progress Gauge */}
+                        <svg className="transform -rotate-90 w-20 h-20">
+                          <circle
+                            className="text-slate-100"
+                            cx="40"
+                            cy="40"
+                            fill="transparent"
+                            r="34"
+                            stroke="currentColor"
+                            strokeWidth="6"
+                          />
+                          <circle
+                            className="text-emerald-700 transition-all duration-500"
+                            cx="40"
+                            cy="40"
+                            fill="transparent"
+                            r="34"
+                            stroke="currentColor"
+                            strokeDasharray="213"
+                            strokeDashoffset={213 - (213 * (activeSecObj.secAvgPct || 0)) / 100}
+                            strokeWidth="6"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-2xl font-bold text-slate-900 tracking-tighter font-['Playfair_Display']">
+                            {activeSecObj.secAvgPct || 0}<span className="text-xs text-slate-500 font-sans font-semibold ml-0.5">%</span>
                           </span>
-                          {onOpenAssignClassModal && (
-                            <button
-                              type="button"
-                              onClick={() => onOpenAssignClassModal()}
-                              className="text-xs font-bold text-sky-800 hover:text-sky-950 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center space-x-1"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Assign Teacher</span>
-                            </button>
-                          )}
                         </div>
                       </div>
+                      <div>
+                        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                          Class Average
+                        </h2>
+                        <div className="text-xs text-slate-600 font-semibold">Exam Performance</div>
+                      </div>
+                    </div>
+                  </section>
 
-                      {activeSecObj.appointedTeachers.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400 space-y-2">
-                          <p className="text-xs font-semibold text-slate-600">
-                            No subject teachers currently appointed for {gm.grade} ({activeSecObj.section}).
-                          </p>
-                          {onOpenAssignClassModal && (
-                            <button
-                              type="button"
-                              onClick={() => onOpenAssignClassModal()}
-                              className="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-800 hover:underline cursor-pointer pt-1"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Appoint a subject teacher now</span>
-                            </button>
-                          )}
-                        </div>
+                  {/* BEGIN: Class In-Charge Card */}
+                  <section className="bg-white rounded-2xl shadow-2xs border border-slate-200/90 p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      {activeSecObj.inCharge ? (
+                        <>
+                          <div className="relative shrink-0">
+                            <img
+                              src={activeSecObj.inCharge.photoUrl}
+                              alt={activeSecObj.inCharge.name}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-xs ring-1 ring-slate-200"
+                            />
+                            <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                          </div>
+                          <div className="min-w-0">
+                            <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                              Class In-Charge
+                            </h2>
+                            <h3 className="text-lg font-bold text-slate-900 truncate">
+                              {activeSecObj.inCharge.name}
+                            </h3>
+                            <p className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mt-0.5">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                              <span>{activeSecObj.inCharge.designation || 'Lecturer'}</span>
+                            </p>
+                          </div>
+                        </>
                       ) : (
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs">
-                            <thead>
-                              <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px] bg-slate-50/50">
-                                <th className="p-3">Assigned Teacher</th>
-                                <th className="p-3">Subject Taught</th>
-                                <th className="p-3 hidden md:block">Designation</th>
-                                <th className="p-3">Qualification</th>
-                                <th className="p-3 text-right">Action</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {activeSecObj.appointedTeachers.map((ap, idx) => (
-                                <tr
-                                  key={`${ap.teacher.id}-${ap.subject}-${idx}`}
-                                  className="hover:bg-slate-50/80 transition-colors"
-                                >
-                                  <td className="p-3">
-                                    <div
-                                      onClick={() =>
-                                        onSelectTeacher && onSelectTeacher(ap.teacher)
-                                      }
-                                      className="flex items-center space-x-2.5 cursor-pointer group"
-                                    >
-                                      <img
-                                        src={ap.teacher.photoUrl}
-                                        alt={ap.teacher.name}
-                                        className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
-                                      />
-                                      <div>
-                                        <div className="font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
-                                          {ap.teacher.name}
-                                        </div>
-                                        <div className="text-[10px] hidden md:block text-slate-400">
-                                          ID: {ap.teacher.employeeId || ap.teacher.id}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="p-3 font-bold text-emerald-900">
-                                    <span className="bg-slate-200 text-slate-600 px-2.5 py-1 rounded-md border border-slate-200/80">
-                                      {ap.subject}
-                                    </span>
-                                  </td>
-                                  <td className="p-3 font-medium hidden md:block text-slate-600">
-                                    {ap.teacher.designation}
-                                  </td>
-                                  <td className="p-3 font-medium text-slate-500">
-                                    {ap.teacher.qualification || '—'}
-                                  </td>
-                                  <td className="p-3 text-right">
-                                    {onOpenAssignClassModal && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onOpenAssignClassModal(ap.teacher)}
-                                        className="text-emerald-800 hover:text-emerald-950 font-bold text-xs bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
-                                      >
-                                        
-                                        <PencilLine  className='w-4 h-4 '/>
-                                      </button>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                        <>
+                          <div className="w-16 h-16 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-400 shrink-0">
+                            <UserCheck className="w-8 h-8" />
+                          </div>
+                          <div>
+                            <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                              Class In-Charge
+                            </h2>
+                            <h3 className="text-base font-bold text-slate-700 ">
+                              Not Appointed
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Assign in-charge for {gm.grade} ({activeSecObj.section})
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onOpenAssignInChargeModal && onOpenAssignInChargeModal(activeSecObj.inCharge)}
+                      className="px-4 py-2.5 bg-white text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 font-bold rounded-xl text-xs transition-colors border border-slate-200 hover:border-emerald-200 shadow-2xs flex items-center gap-2 shrink-0 cursor-pointer"
+                    >
+                      <UserCheck className="w-4 h-4 text-emerald-800" />
+                      <span>{activeSecObj.inCharge ? 'Change' : 'Assign'}</span>
+                    </button>
+                  </section>
+                </div>
+
+                {/* 3. Appointed Subjects Table */}
+                <section className="bg-white rounded-2xl shadow-2xs border border-slate-200/90 overflow-hidden">
+                  {/* Table Header Area */}
+                  <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                        Appointed Subject Teachers
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Manage teachers assigned to Grade {gm.grade} — {activeSecObj.section}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs px-3 py-1 bg-white border border-slate-200 rounded-full text-slate-700 font-bold shadow-2xs">
+                        {activeSecObj.appointedTeachers.length} Active
+                      </span>
+                      {onOpenAssignClassModal && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenAssignClassModal()}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-xl text-xs transition-colors shadow-2xs cursor-pointer"
+                        >
+                          <UserPlus className="w-4 h-4 text-emerald-200" />
+                          <span>Assign Teacher</span>
+                        </button>
                       )}
                     </div>
                   </div>
-                )}
+
+                  {/* Table Content */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-slate-600">
+                      <thead className="bg-white border-b border-slate-100 text-[10px] text-slate-400 uppercase font-bold tracking-widest">
+                        <tr>
+                          <th className="px-6 py-4" scope="col">Assigned Teacher</th>
+                          <th className="px-6 py-4" scope="col">Subject Taught</th>
+                          <th className="px-6 py-4" scope="col">Designation</th>
+                          <th className="px-6 py-4" scope="col">Status</th>
+                          <th className="px-6 py-4 text-right" scope="col">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {activeSecObj.appointedTeachers.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
+                              <p className="font-semibold text-slate-600 text-xs">
+                                No subject teachers currently assigned to Grade {gm.grade} ({activeSecObj.section}).
+                              </p>
+                              {onOpenAssignClassModal && (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenAssignClassModal()}
+                                  className="mt-2 text-xs font-bold text-emerald-800 hover:underline cursor-pointer inline-flex items-center space-x-1"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Assign a teacher now</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ) : (
+                          activeSecObj.appointedTeachers.map((ap, idx) => (
+                            <tr
+                              key={`${ap.teacher.id}-${ap.subject}-${idx}`}
+                              className="hover:bg-slate-50/70 transition-colors bg-white group"
+                            >
+                              <td className="px-6 py-4">
+                                <div
+                                  onClick={() => onSelectTeacher && onSelectTeacher(ap.teacher)}
+                                  className="flex items-center gap-3.5 cursor-pointer"
+                                >
+                                  <img
+                                    src={ap.teacher.photoUrl}
+                                    alt={ap.teacher.name}
+                                    className="w-10 h-10 rounded-full object-cover shadow-2xs ring-1 ring-slate-200"
+                                  />
+                                  <div>
+                                    <div className="font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
+                                      {ap.teacher.name}
+                                    </div>
+                                    <div className="text-[10px] text-slate-400 font-mono mt-0.5 font-medium">
+                                      ID: {ap.teacher.employeeId || `DS-2024-${ap.teacher.id}`}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-100">
+                                  {ap.subject}
+                                </span>
+                              </td>
+
+                              <td className="px-6 py-4 text-slate-600 font-semibold">
+                                {ap.teacher.designation || 'Lecturer'}
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                  Active
+                                </span>
+                              </td>
+
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenAssignClassModal && onOpenAssignClassModal(ap.teacher)}
+                                  className="p-2 rounded-lg text-slate-400 hover:text-emerald-800 hover:bg-emerald-50 transition-colors inline-flex border border-transparent hover:border-emerald-200 cursor-pointer"
+                                  title="Edit assignment details"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
               </div>
             );
           })
