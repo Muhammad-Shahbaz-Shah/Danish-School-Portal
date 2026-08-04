@@ -32,7 +32,7 @@ app.use((req: Request, res: Response, next) => {
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
-  if (req.url && !req.url.startsWith('/api')) {
+ if (process.env.VERCEL && req.url && !req.url.startsWith('/api')) {
     req.url = '/api' + (req.url.startsWith('/') ? '' : '/') + req.url;
   }
   next();

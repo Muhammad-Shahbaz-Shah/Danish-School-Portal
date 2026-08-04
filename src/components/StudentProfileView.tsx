@@ -26,6 +26,11 @@ import {
   AlertCircle,
   UserCheck,
   Bot,
+  BookOpenCheck,
+  Ribbon,
+  PenTool,
+  ChevronRightCircle,
+  ChevronLeftCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -299,9 +304,12 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
             let cat = "Class Test";
             if (titleLower.includes("weekly")) cat = "Weekly Test";
             else if (titleLower.includes("monthly")) cat = "Monthly Test";
-            else if (titleLower.includes("mid"))
-              cat = "Mid Term Exam";
-            else if(titleLower.includes("series")|| titleLower.includes("mock")) cat = "Mock Test" 
+            else if (titleLower.includes("mid")) cat = "Mid Term Exam";
+            else if (
+              titleLower.includes("series") ||
+              titleLower.includes("mock")
+            )
+              cat = "Mock Test";
             else if (
               titleLower.includes("annual") ||
               titleLower.includes("final")
@@ -361,6 +369,19 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       return matchSubject && matchCategory;
     });
   }, [resultHistory, selectedSubjectFilter, selectedCategoryFilter]);
+
+  // Pagination settings
+  const rowsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredResultHistory]);
+  const paginatedResults = useMemo(() => {
+    const start = (currentPage - 1) * rowsPerPage;
+    return filteredResultHistory.slice(start, start + rowsPerPage);
+  }, [filteredResultHistory, currentPage]);
+  const pageCount = Math.ceil(filteredResultHistory.length / rowsPerPage);
 
   const chartData = useMemo(() => {
     const list: {
@@ -453,7 +474,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       {/* Main Dossier Header Banner */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-xs relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center space-x-5">
+          <div className="flex flex-col md:flex-row justify-center items-center space-x-5">
             <img
               src={
                 student.photoUrl ||
@@ -462,8 +483,8 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
               alt={student.name}
               className="w-24 h-24 rounded-2xl object-cover ring-4 ring-emerald-700/20 shadow-md"
             />
-            <div>
-              <div className="flex items-center space-x-2">
+            <div className="flex flex-col  ">
+              <div className="flex items-center  md:justify-start justify-center space-x-2">
                 <h1 className="text-2xl font-bold text-slate-900 font-['Playfair_Display']">
                   {student.name}
                 </h1>
@@ -480,10 +501,10 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
                   </button>
                 )}
               </div>
-              <p className="text-sm font-semibold text-emerald-800 mt-0.5">
+              <p className="text-sm md:text-left text-center font-semibold text-emerald-800 my-1.5">
                 {student.grade} ({student.section})
               </p>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
+              <div className="flex flex-wrap items-center md:justify-start  justify-center gap-3 text-xs text-slate-500 mt-1">
                 <span className="flex items-center space-x-1">
                   <Home className="w-3.5 h-3.5 text-amber-600" />
                   <strong className="text-slate-800">
@@ -505,8 +526,8 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
-            <div className="text-center p-2 bg-emerald-50 rounded-xl">
+          <div className="flex flex-wrap  gap-4 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
+            <div className="text-center flex-1 p-2 bg-emerald-50 rounded-xl">
               <div className="text-xl font-extrabold text-emerald-900 font-['Playfair_Display']">
                 {student.entryTestMarks || 85}
               </div>
@@ -515,7 +536,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
               </div>
             </div>
 
-            <div className="text-center p-2 bg-slate-50 rounded-xl">
+            <div className="flex-1 text-center p-2 bg-slate-50 rounded-xl">
               <div className="text-xl font-extrabold text-slate-900 font-['Playfair_Display']">
                 {resultHistory.length}
               </div>
@@ -524,7 +545,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
               </div>
             </div>
 
-            <div className="text-center p-2 bg-amber-50 rounded-xl">
+            <div className="text-center flex-1 p-2 bg-amber-50 rounded-xl">
               <div className="text-lg font-extrabold text-amber-900 font-['Playfair_Display'] truncate">
                 {student.house || "Chenab"}
               </div>
@@ -533,7 +554,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
               </div>
             </div>
 
-            <div className="text-center p-2 bg-slate-50 rounded-xl">
+            <div className="text-center p-2 flex-1 bg-slate-50 rounded-xl">
               <div className="text-xl font-extrabold text-emerald-700 font-['Playfair_Display']">
                 {student.status}
               </div>
@@ -740,63 +761,65 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
       {/* Results History */}
       {(activeTab === "overview" || activeTab === "results") && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="flex  gap-2 border-b relative border-slate-100 pb-4">
+           
+            <span className="p-2 px-3 flex items-center justify-center  rounded-lg bg-emerald-100 ">
+              <BookOpenCheck className="text-green-600" />{" "}
+            </span>{" "}
             <div>
-              <h2 className="text-sm font-bold text-slate-900">
+              <h2 className="text-xl font-bold flex items-center gap-1  text-slate-900">
                 Examination Results Record
               </h2>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[12px]  text-slate-500">
                 Filter records by subject or assessment category
               </p>
             </div>
-
-            {/* Dynamic Dual Filters */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 text-xs w-full md:w-auto">
-              {/* Subject Filter */}
-              <div className="flex items-center space-x-1.5  p-1 overflow-x-auto w-full sm:w-auto  rounded-lg sm:pb-0">
-                <span className="font-bold text-slate-400 uppercase text-[10px] shrink-0 mr-1">
-                  Subject:
-                </span>
-                <div className="overflow-x-auto p-1 border bg-zinc-200 border-slate-400 rounded-lg w-full flex items-center gap-1.5 scrollbar-none ">
-                  {availableSubjects.map((sbj) => (
-                    <button
-                      key={sbj}
-                      type="button"
-                      onClick={() => setSelectedSubjectFilter(sbj)}
-                      className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 cursor-pointer ${
-                        selectedSubjectFilter.toLowerCase() ===
-                        sbj.toLowerCase()
-                          ? "bg-emerald-800 text-white shadow-2xs"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                      }`}
-                    >
-                      {sbj}
-                    </button>
-                  ))}
-                </div>
+          </div>
+          {/* Dynamic Dual Filters */}
+          <div className="   text-xs w-fit space-y-3  ">
+            {/* Subject Filter */}
+            <div className="flex items-center space-x-1.5  p-1 overflow-x-auto w-full sm:w-auto  rounded-lg sm:pb-0">
+              <span className="font-bold  uppercase text-xs shrink-0 ">
+                Subject:
+              </span>
+              <div className="overflow-x-auto p-1  w-full flex items-center gap-1.5 scrollbar-none ">
+                {availableSubjects.map((sbj) => (
+                  <button
+                    key={sbj}
+                    type="button"
+                    onClick={() => setSelectedSubjectFilter(sbj)}
+                    className={`px-2.5 py-2 rounded-full font-bold text-[11px] transition-all shrink-0 cursor-pointer ${
+                      selectedSubjectFilter.toLowerCase() === sbj.toLowerCase()
+                        ? "bg-emerald-800 text-white shadow-2xs"
+                        : "border border-slate-300 hover:border-emerald-700"
+                    }`}
+                  >
+                    {sbj}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Category Filter */}
-              <div className="flex items-center space-x-1.5 overflow-x-auto scrollbar-none w-full sm:w-auto pb-1 sm:pb-0">
-                <span className="font-bold text-slate-400 uppercase text-[10px] shrink-0 mr-1">
-                  Type:
-                </span>
-                 <div className="overflow-x-auto p-1 bg-zinc-200 border border-slate-400 rounded-lg w-full flex items-center gap-1.5 scrollbar-none ">
+            {/* Category Filter */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto scrollbar-none w-full sm:w-auto pb-1 sm:pb-0">
+              <span className="font-bold  uppercase text-xs shrink-0 ">
+                Type:
+              </span>
+              <div className=" w-full ml-7.5 flex items-center gap-1.5 scrollbar-none ">
                 {availableCategories.map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setSelectedCategoryFilter(cat)}
-                    className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 cursor-pointer ${
+                    className={`px-2.5 py-2 rounded-full font-bold text-[11px] transition-all shrink-0 cursor-pointer ${
                       selectedCategoryFilter.toLowerCase() === cat.toLowerCase()
-                        ? "bg-amber-800 text-white shadow-2xs"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        ? "bg-emerald-800 text-white shadow-2xs"
+                        : " hover:border-emerald-600 border border-slate-300"
                     }`}
                   >
                     {cat}
                   </button>
                 ))}
-                </div>
               </div>
             </div>
           </div>
@@ -805,10 +828,9 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] bg-slate-50">
-                  <th className="p-3">Exam Date</th>
-                  <th className="p-3">Examination Title</th>
                   <th className="p-3">Subject</th>
-                  <th className="p-3">Classification</th>
+                  <th className="p-3">Exam Type</th>
+                  <th className="p-3">Exam Date</th>
                   <th className="p-3">Marks Obtained</th>
                   <th className="p-3">Percentage</th>
                   <th className="p-3 text-right">Grade</th>
@@ -826,25 +848,19 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredResultHistory.map((res, idx) => (
+                  paginatedResults.map((res, idx) => (
                     <tr
                       key={idx}
                       className="hover:bg-emerald-50/50 transition-colors"
                     >
-                      <td className="p-3 font-mono font-bold text-slate-500 text-[11px] whitespace-nowrap">
-                        {res.date}
-                      </td>
-                      <td className="p-3 font-bold text-slate-900">
-                        {res.title}
-                      </td>
                       <td className="p-3 font-semibold text-emerald-800">
                         {res.subject}
                       </td>
-                      <td className="p-3">
-                        <span className="bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded text-[10px] border border-slate-200">
-                          {res.category}
-                        </span>
+                      <td className="p-3 shrink-0">{res.category}</td>
+                      <td className="p-3  text-slate-500 text-[11px] whitespace-nowrap">
+                        {res.date}
                       </td>
+
                       <td className="p-3 font-medium text-slate-700">
                         {res.marks} / {res.maxMarks}
                       </td>
@@ -873,6 +889,17 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
                 )}
               </tbody>
             </table>
+<div className="flex justify-between items-center mt-4 text-sm">
+  <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} className="px-3 py-1.5 flex font-semibold gap-1  items-center   rounded-full border border-slate-200 text-emerald-800  disabled:opacity-50">
+    
+    <ChevronLeftCircle  className="size-4 "/>Previous
+  </button>
+  <span className="font-mono">Page {currentPage} of {pageCount}</span>
+  <button onClick={() => setCurrentPage(p => Math.min(p + 1, pageCount))} disabled={currentPage === pageCount} className="px-3 py-1.5 flex font-semibold gap-1  items-center   rounded-full border border-slate-200 text-emerald-800  disabled:opacity-50">
+    Next
+    <ChevronRightCircle  className="size-4 "/>
+  </button>
+</div>
           </div>
         </div>
       )}

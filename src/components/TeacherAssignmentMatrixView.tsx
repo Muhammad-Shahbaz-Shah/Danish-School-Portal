@@ -659,7 +659,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
                               <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px] bg-slate-50/50">
                                 <th className="p-3">Assigned Teacher</th>
                                 <th className="p-3">Subject Taught</th>
-                                <th className="p-3">Designation</th>
+                                <th className="p-3 hidden md:block">Designation</th>
                                 <th className="p-3">Qualification</th>
                                 <th className="p-3 text-right">Action</th>
                               </tr>
@@ -686,7 +686,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
                                         <div className="font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
                                           {ap.teacher.name}
                                         </div>
-                                        <div className="text-[10px] text-slate-400">
+                                        <div className="text-[10px] hidden md:block text-slate-400">
                                           ID: {ap.teacher.employeeId || ap.teacher.id}
                                         </div>
                                       </div>
@@ -697,7 +697,7 @@ export const TeacherAssignmentMatrixView: React.FC<TeacherAssignmentMatrixViewPr
                                       {ap.subject}
                                     </span>
                                   </td>
-                                  <td className="p-3 font-medium text-slate-600">
+                                  <td className="p-3 font-medium hidden md:block text-slate-600">
                                     {ap.teacher.designation}
                                   </td>
                                   <td className="p-3 font-medium text-slate-500">
